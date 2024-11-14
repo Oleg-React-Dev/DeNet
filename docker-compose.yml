@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+
+  postgres:
+    image: postgres:17
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: ${PGSQL_USERS_USER}
+      POSTGRES_PASSWORD: ${PGSQL_USERS_PASSWORD}
+      POSTGRES_DB: ${PGSQL_USERS_DB_NAME}
+    volumes:
+      - users_pgdata:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+  app:
+    build: .
+    command: [ "bash", "-c", "./wait-for-postgres.sh postgres_db make run" ]
+    ports:
+      - "8080:8080"
+    networks:
+      - app_network
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+
+networks:
+  app_network:
+
+
+volumes:
+  users_pgdata:
+
+
